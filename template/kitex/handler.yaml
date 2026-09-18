@@ -1,0 +1,35 @@
+path: internal/{{.Namespace}}/handler.go
+body: |-
+  package {{.Namespace}}
+
+  import (
+      "context"
+
+      {{.PkgRefName}} "{{.ImportPath}}"
+  )
+
+  // {{.ServiceName}}Impl implements the service defined in the IDL.
+  type {{.ServiceName}}Impl struct{}
+
+  {{range .AllMethods}}
+  {{- if or .ClientStreaming .ServerStreaming}}
+  func (s *{{$.ServiceName}}Impl) {{.Name}}({{if $.StreamX}}ctx context.Context, {{end}}{{if not .ClientStreaming}}{{range .Args}}{{LowerFirst .Name}} {{.Type}}, {{end}}{{end}}stream {{.PkgRefName}}.{{.ServiceName}}_{{.RawName}}Server) (err error) {
+      // TODO: Your code here...
+      return
+  }
+  {{- else}}
+  {{- if .Void}}
+  // {{.Name}} implements the {{$.ServiceName}}Impl interface.
+  func (s *{{$.ServiceName}}Impl) {{.Name}}(ctx context.Context{{range .Args}}, {{LowerFirst .Name}} {{.Type}}{{end}}) (err error) {
+      // TODO: Your code here...
+      return
+  }
+  {{- else}}
+  // {{.Name}} implements the {{$.ServiceName}}Impl interface.
+  func (s *{{$.ServiceName}}Impl) {{.Name}}(ctx context.Context{{range .Args}}, {{LowerFirst .Name}} {{.Type}}{{end}}) (resp {{.Resp.Type}}, err error) {
+      // TODO: Your code here...
+      return
+  }
+  {{- end}}
+  {{- end}}
+  {{end}}

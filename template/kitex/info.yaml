@@ -1,0 +1,6 @@
+path: rpc/{{.Namespace}}/kitex_info.yaml
+body: |-
+  kitexinfo:
+    ServiceName: '{{.Namespace}}'
+    IDLServiceName: '{{.ServiceName}}'
+    ToolVersion: '{{.Version}}'

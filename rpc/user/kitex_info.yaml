@@ -1,0 +1,4 @@
+kitexinfo:
+  ServiceName: 'user'
+  IDLServiceName: 'UserService'
+  ToolVersion: 'v0.16.3'

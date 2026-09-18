@@ -1,0 +1,4 @@
+kitexinfo:
+  ServiceName: 'auth'
+  IDLServiceName: 'AuthService'
+  ToolVersion: 'v0.16.3'

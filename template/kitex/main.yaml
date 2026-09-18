@@ -1,0 +1,18 @@
+path: cmd/{{.Namespace}}/main.go
+body: |-
+  package main
+
+  import (
+      "log"
+
+      handler "{{.Module}}/internal/{{.Namespace}}"
+      service "{{.ImportPath}}/{{ToLower .ServiceName}}"
+  )
+
+  func main() {
+      svr := service.NewServer(new(handler.{{.ServiceName}}Impl))
+
+      if err := svr.Run(); err != nil {
+          log.Println(err.Error())
+      }
+  }

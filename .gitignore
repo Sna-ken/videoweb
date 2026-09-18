@@ -1,0 +1,16 @@
+*.exe
+*.exe~
+*.test
+*.prof
+*.rar
+*.zip
+*.gz
+*.psd
+*.bmd
+*.cfg
+*.pptx
+/.idea
+/.vscode
+/output
+AGENTS.md
+config.yml
