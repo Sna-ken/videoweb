@@ -47,6 +47,9 @@ func (s *UserServiceImpl) CreateUser(ctx context.Context, req *user.CreateUserRe
 		username = req.Username
 	}
 
-	bizErr := s.service.CreateUser(ctx, userID, username)
-	return &user.CreateUserResp{Base: base.BaseRPCResp(bizErr)}, nil
+	if err = s.service.CreateUser(ctx, userID, username); err != nil {
+		return &user.CreateUserResp{Base: base.ErrsRPCResp(err)}, err
+	}
+
+	return &user.CreateUserResp{Base: base.SuccessRPCResp()}, nil
 }

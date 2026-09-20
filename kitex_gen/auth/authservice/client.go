@@ -13,6 +13,7 @@ import (
 type Client interface {
 	Register(ctx context.Context, req *auth.RegisterReq, callOptions ...callopt.Option) (r *auth.RegisterResp, err error)
 	Login(ctx context.Context, req *auth.LoginReq, callOptions ...callopt.Option) (r *auth.LoginResp, err error)
+	Logout(ctx context.Context, req *auth.LogoutReq, callOptions ...callopt.Option) (r *auth.LogoutResp, err error)
 	GetMFAqr(ctx context.Context, req *auth.GetMFAqrReq, callOptions ...callopt.Option) (r *auth.GetMFAqrResp, err error)
 	BindMFA(ctx context.Context, req *auth.BindMFAReq, callOptions ...callopt.Option) (r *auth.BindMFAResp, err error)
 	UnbindMFA(ctx context.Context, req *auth.UnbindMFAReq, callOptions ...callopt.Option) (r *auth.UnbindMFAResp, err error)
@@ -56,6 +57,11 @@ func (p *kAuthServiceClient) Register(ctx context.Context, req *auth.RegisterReq
 func (p *kAuthServiceClient) Login(ctx context.Context, req *auth.LoginReq, callOptions ...callopt.Option) (r *auth.LoginResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.Login(ctx, req)
+}
+
+func (p *kAuthServiceClient) Logout(ctx context.Context, req *auth.LogoutReq, callOptions ...callopt.Option) (r *auth.LogoutResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.Logout(ctx, req)
 }
 
 func (p *kAuthServiceClient) GetMFAqr(ctx context.Context, req *auth.GetMFAqrReq, callOptions ...callopt.Option) (r *auth.GetMFAqrResp, err error) {

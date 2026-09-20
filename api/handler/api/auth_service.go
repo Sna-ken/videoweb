@@ -108,11 +108,36 @@ func Login(ctx context.Context, c *app.RequestContext) {
 	var req api.LoginReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
+		base.ErrHTTPResp(c, err)
+		return
+	}
+
+	RPCresp, err := client.AuthServiceClient.Login(ctx, &auth.LoginReq{
+		Username: req.Username,
+		Password: req.Password,
+		MfaCode:  req.MfaCode,
+	})
+
+	if err != nil {
+		base.ErrHTTPRespWithData(c, err, RPCresp)
+		return
+	}
+
+	base.SuccessHTTPRespWithData(c, RPCresp)
+}
+
+// Logout .
+// @router /api/v1/auth/logout [POST]
+func Logout(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req api.LogoutReq
+	err = c.BindAndValidate(&req)
+	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
 
-	resp := new(api.LoginResp)
+	resp := new(api.LogoutResp)
 
 	c.JSON(consts.StatusOK, resp)
 }

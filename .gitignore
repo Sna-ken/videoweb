@@ -9,6 +9,7 @@
 *.bmd
 *.cfg
 *.pptx
+*.pem
 /.idea
 /.vscode
 /output

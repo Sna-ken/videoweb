@@ -27,6 +27,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
+	"Logout": kitex.NewMethodInfo(
+		logoutHandler,
+		newAuthServiceLogoutArgs,
+		newAuthServiceLogoutResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
 	"GetMFAqr": kitex.NewMethodInfo(
 		getMFAqrHandler,
 		newAuthServiceGetMFAqrArgs,
@@ -157,6 +164,24 @@ func newAuthServiceLoginResult() interface{} {
 	return auth.NewAuthServiceLoginResult()
 }
 
+func logoutHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*auth.AuthServiceLogoutArgs)
+	realResult := result.(*auth.AuthServiceLogoutResult)
+	success, err := handler.(auth.AuthService).Logout(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newAuthServiceLogoutArgs() interface{} {
+	return auth.NewAuthServiceLogoutArgs()
+}
+
+func newAuthServiceLogoutResult() interface{} {
+	return auth.NewAuthServiceLogoutResult()
+}
+
 func getMFAqrHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	realArg := arg.(*auth.AuthServiceGetMFAqrArgs)
 	realResult := result.(*auth.AuthServiceGetMFAqrResult)
@@ -254,6 +279,16 @@ func (p *kClient) Login(ctx context.Context, req *auth.LoginReq) (r *auth.LoginR
 	_args.Req = req
 	var _result auth.AuthServiceLoginResult
 	if err = p.c.Call(ctx, "Login", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) Logout(ctx context.Context, req *auth.LogoutReq) (r *auth.LogoutResp, err error) {
+	var _args auth.AuthServiceLogoutArgs
+	_args.Req = req
+	var _result auth.AuthServiceLogoutResult
+	if err = p.c.Call(ctx, "Logout", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

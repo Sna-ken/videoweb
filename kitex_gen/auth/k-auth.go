@@ -178,6 +178,82 @@ func (p *AuthServiceLoginResult) GetResult() interface{} {
 	return p.Success
 }
 
+type AuthServiceLogoutArgs struct {
+	Req *LogoutReq `thrift:"req,1" frugal:"1,default,LogoutReq" json:"req"`
+}
+
+func NewAuthServiceLogoutArgs() *AuthServiceLogoutArgs {
+	return &AuthServiceLogoutArgs{}
+}
+
+func (p *AuthServiceLogoutArgs) InitDefault() {
+}
+
+var AuthServiceLogoutArgs_Req_DEFAULT *LogoutReq
+
+func (p *AuthServiceLogoutArgs) GetReq() (v *LogoutReq) {
+	if !p.IsSetReq() {
+		return AuthServiceLogoutArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+func (p *AuthServiceLogoutArgs) SetReq(val *LogoutReq) {
+	p.Req = val
+}
+
+func (p *AuthServiceLogoutArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *AuthServiceLogoutArgs) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("AuthServiceLogoutArgs(%+v)", *p)
+}
+
+func (p *AuthServiceLogoutArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type AuthServiceLogoutResult struct {
+	Success *LogoutResp `thrift:"success,0,optional" frugal:"0,optional,LogoutResp" json:"success,omitempty"`
+}
+
+func NewAuthServiceLogoutResult() *AuthServiceLogoutResult {
+	return &AuthServiceLogoutResult{}
+}
+
+func (p *AuthServiceLogoutResult) InitDefault() {
+}
+
+var AuthServiceLogoutResult_Success_DEFAULT *LogoutResp
+
+func (p *AuthServiceLogoutResult) GetSuccess() (v *LogoutResp) {
+	if !p.IsSetSuccess() {
+		return AuthServiceLogoutResult_Success_DEFAULT
+	}
+	return p.Success
+}
+func (p *AuthServiceLogoutResult) SetSuccess(x interface{}) {
+	p.Success = x.(*LogoutResp)
+}
+
+func (p *AuthServiceLogoutResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *AuthServiceLogoutResult) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("AuthServiceLogoutResult(%+v)", *p)
+}
+
+func (p *AuthServiceLogoutResult) GetResult() interface{} {
+	return p.Success
+}
+
 type AuthServiceGetMFAqrArgs struct {
 	Req *GetMFAqrReq `thrift:"req,1" frugal:"1,default,GetMFAqrReq" json:"req"`
 }

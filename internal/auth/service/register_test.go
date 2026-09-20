@@ -8,6 +8,7 @@ import (
 	"github.com/Sna-ken/videoweb/internal/auth/repository"
 	"github.com/Sna-ken/videoweb/pkg/db/model"
 	"github.com/Sna-ken/videoweb/pkg/errno"
+	"github.com/Sna-ken/videoweb/pkg/utils"
 	"github.com/bytedance/mockey"
 	"github.com/google/uuid"
 )
@@ -37,7 +38,7 @@ func TestRegisterReturnsPasswordHashError(t *testing.T) {
 	mockey.PatchRun(func() {
 		hashErr := errors.New("hash failed")
 		mockey.Mock((*repository.AuthDB).ExistsByUsername).Return(false, nil).Build()
-		mockey.Mock(hashPassword).Return("", hashErr).Build()
+		mockey.Mock(utils.HashPassword).Return("", hashErr).Build()
 
 		service := NewAuthService(&repository.AuthDB{})
 		_, err := service.Register(context.Background(), "alice", "Abc123!")
@@ -93,7 +94,7 @@ func TestRegisterRepositoryResults(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockey.PatchRun(func() {
-				mockey.Mock(hashPassword).Return("hashed-password", nil).Build()
+				mockey.Mock(utils.HashPassword).Return("hashed-password", nil).Build()
 				existsMock := mockey.Mock((*repository.AuthDB).ExistsByUsername).
 					Return(tt.exists, tt.existsErr).
 					Build()

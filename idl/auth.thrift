@@ -19,7 +19,15 @@ struct LoginReq{
 
 struct LoginResp{
     1: model.BaseResp base,
-    2: string authorization,
+    2: string access_token,
+    3: string refresh_token,
+}
+
+struct LogoutReq{
+}
+
+struct LogoutResp{
+    1: model.BaseResp base,
 }
 
 struct GetMFAqrReq{
@@ -47,17 +55,18 @@ struct UnbindMFAResp{
 }
 
 struct RefreshTokenReq{
-    1: string authorization,
+    1: string refresh_token,
 }
 
 struct RefreshTokenResp{
     1: model.BaseResp base,
-    2: string authorization,
+    2: string access_token,
 }
 
 service AuthService{
     RegisterResp Register(1: RegisterReq req),
     LoginResp Login(1: LoginReq req),
+    LogoutResp Logout(1: LogoutReq req),
     GetMFAqrResp GetMFAqr(1: GetMFAqrReq req),
     BindMFAResp BindMFA(1: BindMFAReq req),
     UnbindMFAResp UnbindMFA(1: UnbindMFAReq req),

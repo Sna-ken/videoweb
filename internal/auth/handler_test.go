@@ -13,12 +13,27 @@ import (
 )
 
 type stubRegisterService struct {
-	userID string
-	err    error
+	userID        string
+	err           error
+	accessToken   string
+	refreshToken  string
+	loginErr      error
+	loginCalls    int
+	loginUsername string
+	loginPassword string
+	loginMFACode  string
 }
 
 func (s *stubRegisterService) Register(context.Context, string, string) (string, error) {
 	return s.userID, s.err
+}
+
+func (s *stubRegisterService) Login(_ context.Context, username, password, mfaCode string) (string, string, error) {
+	s.loginCalls++
+	s.loginUsername = username
+	s.loginPassword = password
+	s.loginMFACode = mfaCode
+	return s.accessToken, s.refreshToken, s.loginErr
 }
 
 type stubUserCreator struct {
@@ -117,5 +132,61 @@ func TestRegisterPropagatesUserBusinessError(t *testing.T) {
 	}
 	if resp.Base.Code != errno.UserHasExistedErrorCode {
 		t.Fatalf("Register() code = %d, want %d", resp.Base.Code, errno.UserHasExistedErrorCode)
+	}
+}
+
+func TestLoginReturnsTokens(t *testing.T) {
+	service := &stubRegisterService{
+		accessToken:  "access-token",
+		refreshToken: "refresh-token",
+	}
+	handler := &AuthServiceImpl{service: service}
+
+	resp, err := handler.Login(context.Background(), &authmodel.LoginReq{
+		Username: "alice",
+		Password: "Abc123!",
+		MfaCode:  "123456",
+	})
+
+	if err != nil {
+		t.Fatalf("Login() error = %v, want nil", err)
+	}
+	if resp.Base.Code != errno.SuccessCode {
+		t.Fatalf("Login() code = %d, want %d", resp.Base.Code, errno.SuccessCode)
+	}
+	if resp.AccessToken != "access-token" || resp.RefreshToken != "refresh-token" {
+		t.Fatalf("Login() tokens = (%q, %q), want access-token and refresh-token", resp.AccessToken, resp.RefreshToken)
+	}
+	if service.loginCalls != 1 {
+		t.Fatalf("service Login() calls = %d, want 1", service.loginCalls)
+	}
+	if service.loginUsername != "alice" || service.loginPassword != "Abc123!" || service.loginMFACode != "123456" {
+		t.Fatalf(
+			"service Login() arguments = (%q, %q, %q), want alice, Abc123!, 123456",
+			service.loginUsername,
+			service.loginPassword,
+			service.loginMFACode,
+		)
+	}
+}
+
+func TestLoginReturnsServiceError(t *testing.T) {
+	loginErr := errno.Wrap(errno.NewErr(errno.PasswordIncorrectErrorCode, "密码错误"), nil)
+	service := &stubRegisterService{loginErr: loginErr}
+	handler := &AuthServiceImpl{service: service}
+
+	resp, err := handler.Login(context.Background(), &authmodel.LoginReq{
+		Username: "alice",
+		Password: "wrong-password",
+	})
+
+	if !errors.Is(err, loginErr) {
+		t.Fatalf("Login() error = %v, want %v", err, loginErr)
+	}
+	if resp.Base.Code != errno.PasswordIncorrectErrorCode {
+		t.Fatalf("Login() code = %d, want %d", resp.Base.Code, errno.PasswordIncorrectErrorCode)
+	}
+	if resp.AccessToken != "" || resp.RefreshToken != "" {
+		t.Fatalf("Login() tokens = (%q, %q), want empty tokens", resp.AccessToken, resp.RefreshToken)
 	}
 }

@@ -14,6 +14,7 @@ import (
 
 type registerService interface {
 	Register(ctx context.Context, username, password string) (string, error)
+	Login(ctx context.Context, username, password, mfa_code string) (string, string, error)
 }
 
 type userCreator interface {
@@ -41,12 +42,16 @@ func (s *AuthServiceImpl) Register(ctx context.Context, req *auth.RegisterReq) (
 		password = req.Password
 	}
 
-	userID, bizErr := s.service.Register(ctx, username, password)
-	if bizErr == nil {
-		bizErr = s.createUser(ctx, userID, username)
+	userID, err := s.service.Register(ctx, username, password)
+	if err != nil {
+		return &auth.RegisterResp{Base: base.ErrsRPCResp(err)}, err
+	}
+	err = s.createUser(ctx, userID, username)
+	if err != nil {
+		return &auth.RegisterResp{Base: base.ErrsRPCResp(err)}, err
 	}
 
-	return &auth.RegisterResp{Base: base.BaseRPCResp(bizErr)}, nil
+	return &auth.RegisterResp{Base: base.SuccessRPCResp()}, nil
 }
 
 func (s *AuthServiceImpl) createUser(ctx context.Context, userID, username string) error {
@@ -68,6 +73,26 @@ func (s *AuthServiceImpl) createUser(ctx context.Context, userID, username strin
 
 // Login implements the AuthServiceImpl interface.
 func (s *AuthServiceImpl) Login(ctx context.Context, req *auth.LoginReq) (resp *auth.LoginResp, err error) {
+	var username, password string
+	if req.Password != "" && req.Username != "" {
+		username = req.Username
+		password = req.Password
+	}
+
+	accessToken, refreshToken, err := s.service.Login(ctx, username, password, req.MfaCode)
+	if err != nil {
+		return &auth.LoginResp{Base: base.ErrsRPCResp(err)}, err
+	}
+
+	return &auth.LoginResp{
+		Base:         base.SuccessRPCResp(),
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+// Logout implements the AuthServiceImpl interface.
+func (s *AuthServiceImpl) Logout(ctx context.Context, req *auth.LogoutReq) (resp *auth.LogoutResp, err error) {
 	// TODO: Your code here...
 	return
 }

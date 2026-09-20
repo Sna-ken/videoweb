@@ -117,8 +117,9 @@ func (p *LoginReq) String() string {
 }
 
 type LoginResp struct {
-	Base          *model.BaseResp `thrift:"base,1" frugal:"1,default,model.BaseResp" json:"base"`
-	Authorization string          `thrift:"authorization,2" frugal:"2,default,string" json:"authorization"`
+	Base         *model.BaseResp `thrift:"base,1" frugal:"1,default,model.BaseResp" json:"base"`
+	AccessToken  string          `thrift:"access_token,2" frugal:"2,default,string" json:"access_token"`
+	RefreshToken string          `thrift:"refresh_token,3" frugal:"3,default,string" json:"refresh_token"`
 }
 
 func NewLoginResp() *LoginResp {
@@ -137,14 +138,21 @@ func (p *LoginResp) GetBase() (v *model.BaseResp) {
 	return p.Base
 }
 
-func (p *LoginResp) GetAuthorization() (v string) {
-	return p.Authorization
+func (p *LoginResp) GetAccessToken() (v string) {
+	return p.AccessToken
+}
+
+func (p *LoginResp) GetRefreshToken() (v string) {
+	return p.RefreshToken
 }
 func (p *LoginResp) SetBase(val *model.BaseResp) {
 	p.Base = val
 }
-func (p *LoginResp) SetAuthorization(val string) {
-	p.Authorization = val
+func (p *LoginResp) SetAccessToken(val string) {
+	p.AccessToken = val
+}
+func (p *LoginResp) SetRefreshToken(val string) {
+	p.RefreshToken = val
 }
 
 func (p *LoginResp) IsSetBase() bool {
@@ -156,6 +164,57 @@ func (p *LoginResp) String() string {
 		return "<nil>"
 	}
 	return fmt.Sprintf("LoginResp(%+v)", *p)
+}
+
+type LogoutReq struct {
+}
+
+func NewLogoutReq() *LogoutReq {
+	return &LogoutReq{}
+}
+
+func (p *LogoutReq) InitDefault() {
+}
+
+func (p *LogoutReq) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("LogoutReq(%+v)", *p)
+}
+
+type LogoutResp struct {
+	Base *model.BaseResp `thrift:"base,1" frugal:"1,default,model.BaseResp" json:"base"`
+}
+
+func NewLogoutResp() *LogoutResp {
+	return &LogoutResp{}
+}
+
+func (p *LogoutResp) InitDefault() {
+}
+
+var LogoutResp_Base_DEFAULT *model.BaseResp
+
+func (p *LogoutResp) GetBase() (v *model.BaseResp) {
+	if !p.IsSetBase() {
+		return LogoutResp_Base_DEFAULT
+	}
+	return p.Base
+}
+func (p *LogoutResp) SetBase(val *model.BaseResp) {
+	p.Base = val
+}
+
+func (p *LogoutResp) IsSetBase() bool {
+	return p.Base != nil
+}
+
+func (p *LogoutResp) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("LogoutResp(%+v)", *p)
 }
 
 type GetMFAqrReq struct {
@@ -336,7 +395,7 @@ func (p *UnbindMFAResp) String() string {
 }
 
 type RefreshTokenReq struct {
-	Authorization string `thrift:"authorization,1" frugal:"1,default,string" json:"authorization"`
+	RefreshToken string `thrift:"refresh_token,1" frugal:"1,default,string" json:"refresh_token"`
 }
 
 func NewRefreshTokenReq() *RefreshTokenReq {
@@ -346,11 +405,11 @@ func NewRefreshTokenReq() *RefreshTokenReq {
 func (p *RefreshTokenReq) InitDefault() {
 }
 
-func (p *RefreshTokenReq) GetAuthorization() (v string) {
-	return p.Authorization
+func (p *RefreshTokenReq) GetRefreshToken() (v string) {
+	return p.RefreshToken
 }
-func (p *RefreshTokenReq) SetAuthorization(val string) {
-	p.Authorization = val
+func (p *RefreshTokenReq) SetRefreshToken(val string) {
+	p.RefreshToken = val
 }
 
 func (p *RefreshTokenReq) String() string {
@@ -361,8 +420,8 @@ func (p *RefreshTokenReq) String() string {
 }
 
 type RefreshTokenResp struct {
-	Base          *model.BaseResp `thrift:"base,1" frugal:"1,default,model.BaseResp" json:"base"`
-	Authorization string          `thrift:"authorization,2" frugal:"2,default,string" json:"authorization"`
+	Base        *model.BaseResp `thrift:"base,1" frugal:"1,default,model.BaseResp" json:"base"`
+	AccessToken string          `thrift:"access_token,2" frugal:"2,default,string" json:"access_token"`
 }
 
 func NewRefreshTokenResp() *RefreshTokenResp {
@@ -381,14 +440,14 @@ func (p *RefreshTokenResp) GetBase() (v *model.BaseResp) {
 	return p.Base
 }
 
-func (p *RefreshTokenResp) GetAuthorization() (v string) {
-	return p.Authorization
+func (p *RefreshTokenResp) GetAccessToken() (v string) {
+	return p.AccessToken
 }
 func (p *RefreshTokenResp) SetBase(val *model.BaseResp) {
 	p.Base = val
 }
-func (p *RefreshTokenResp) SetAuthorization(val string) {
-	p.Authorization = val
+func (p *RefreshTokenResp) SetAccessToken(val string) {
+	p.AccessToken = val
 }
 
 func (p *RefreshTokenResp) IsSetBase() bool {
@@ -406,6 +465,8 @@ type AuthService interface {
 	Register(ctx context.Context, req *RegisterReq) (r *RegisterResp, err error)
 
 	Login(ctx context.Context, req *LoginReq) (r *LoginResp, err error)
+
+	Logout(ctx context.Context, req *LogoutReq) (r *LogoutResp, err error)
 
 	GetMFAqr(ctx context.Context, req *GetMFAqrReq) (r *GetMFAqrResp, err error)
 

@@ -24,6 +24,7 @@ func Register(r *server.Hertz) {
 			{
 				_auth := _v1.Group("/auth", _authMw()...)
 				_auth.POST("/login", append(_loginMw(), api.Login)...)
+				_auth.POST("/logout", append(_logoutMw(), api.Logout)...)
 				_auth.POST("/register", append(_registerMw(), api.Register)...)
 				{
 					_mfa := _auth.Group("/mfa", _mfaMw()...)

@@ -20,11 +20,18 @@ struct LoginReq{
 
 struct LoginResp{
     1: model.BaseResp base,
-    2: string authorization,
+    2: string access_token,
+    3: string refresh_token,
+}
+
+struct LogoutReq{
+}
+
+struct LogoutResp{
+    1: model.BaseResp base,
 }
 
 struct GetMFAqrReq{
-    1: string authorization,
 }
 
 struct GetMFAqrResp{
@@ -33,8 +40,7 @@ struct GetMFAqrResp{
 }
 
 struct BindMFAReq{
-    1: string authorization,
-    2: string mfa_code,
+    1: string mfa_code,
 }
 
 struct BindMFAResp{
@@ -42,8 +48,7 @@ struct BindMFAResp{
 }
 
 struct UnbindMFAReq{
-    1: string authorization,
-    2: string mfa_code,
+    1: string mfa_code,
 }
 
 struct UnbindMFAResp{
@@ -51,17 +56,18 @@ struct UnbindMFAResp{
 }
 
 struct RefreshTokenReq{
-    1: string authorization,
+    1: string refresh_token,
 }
 
 struct RefreshTokenResp{
     1: model.BaseResp base,
-    2: string authorization,
+    2: string access_token,
 }
 
 service AuthService{
     RegisterResp Register(1: RegisterReq req)(api.post="/api/v1/auth/register"),
     LoginResp Login(1: LoginReq req)(api.post="/api/v1/auth/login"),
+    LogoutResp Logout(1: LogoutReq req)(api.post="/api/v1/auth/logout"),
     GetMFAqrResp GetMFAqr(1: GetMFAqrReq req)(api.get="/api/v1/auth/mfa/qr"),
     BindMFAResp BindMFA(1: BindMFAReq req)(api.post="/api/v1/auth/mfa/bind"),
     UnbindMFAResp UnbindMFA(1: UnbindMFAReq req)(api.post="/api/v1/auth/mfa/unbind"),
@@ -70,7 +76,6 @@ service AuthService{
 
 // user部分
 struct GetUserInfoReq{
-    1: string authorization,
 }
 
 struct GetUserInfoResp{
@@ -79,8 +84,7 @@ struct GetUserInfoResp{
 }
 
 struct UploadAvatarReq{
-    1: string authorization,
-    2: string avatar,
+    1: string avatar,
 }
 
 struct UploadAvatarResp{
@@ -88,8 +92,7 @@ struct UploadAvatarResp{
 }
 
 struct UpdateSignatureReq{
-    1: string authorization,
-    2: string signature,
+    1: string signature,
 }
 
 struct UpdateSignatureResp{

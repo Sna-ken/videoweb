@@ -100,8 +100,9 @@ func (p *LoginReq) String() string {
 }
 
 type LoginResp struct {
-	Base          *model.BaseResp `thrift:"base,1" form:"base" json:"base" query:"base"`
-	Authorization string          `thrift:"authorization,2" form:"authorization" json:"authorization" query:"authorization"`
+	Base         *model.BaseResp `thrift:"base,1" form:"base" json:"base" query:"base"`
+	AccessToken  string          `thrift:"access_token,2" form:"access_token" json:"access_token" query:"access_token"`
+	RefreshToken string          `thrift:"refresh_token,3" form:"refresh_token" json:"refresh_token" query:"refresh_token"`
 }
 
 func NewLoginResp() *LoginResp {
@@ -120,8 +121,12 @@ func (p *LoginResp) GetBase() (v *model.BaseResp) {
 	return p.Base
 }
 
-func (p *LoginResp) GetAuthorization() (v string) {
-	return p.Authorization
+func (p *LoginResp) GetAccessToken() (v string) {
+	return p.AccessToken
+}
+
+func (p *LoginResp) GetRefreshToken() (v string) {
+	return p.RefreshToken
 }
 
 func (p *LoginResp) IsSetBase() bool {
@@ -135,8 +140,55 @@ func (p *LoginResp) String() string {
 	return fmt.Sprintf("LoginResp(%+v)", *p)
 }
 
+type LogoutReq struct {
+}
+
+func NewLogoutReq() *LogoutReq {
+	return &LogoutReq{}
+}
+
+func (p *LogoutReq) InitDefault() {
+}
+
+func (p *LogoutReq) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("LogoutReq(%+v)", *p)
+}
+
+type LogoutResp struct {
+	Base *model.BaseResp `thrift:"base,1" form:"base" json:"base" query:"base"`
+}
+
+func NewLogoutResp() *LogoutResp {
+	return &LogoutResp{}
+}
+
+func (p *LogoutResp) InitDefault() {
+}
+
+var LogoutResp_Base_DEFAULT *model.BaseResp
+
+func (p *LogoutResp) GetBase() (v *model.BaseResp) {
+	if !p.IsSetBase() {
+		return LogoutResp_Base_DEFAULT
+	}
+	return p.Base
+}
+
+func (p *LogoutResp) IsSetBase() bool {
+	return p.Base != nil
+}
+
+func (p *LogoutResp) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("LogoutResp(%+v)", *p)
+}
+
 type GetMFAqrReq struct {
-	Authorization string `thrift:"authorization,1" form:"authorization" json:"authorization" query:"authorization"`
 }
 
 func NewGetMFAqrReq() *GetMFAqrReq {
@@ -144,10 +196,6 @@ func NewGetMFAqrReq() *GetMFAqrReq {
 }
 
 func (p *GetMFAqrReq) InitDefault() {
-}
-
-func (p *GetMFAqrReq) GetAuthorization() (v string) {
-	return p.Authorization
 }
 
 func (p *GetMFAqrReq) String() string {
@@ -194,8 +242,7 @@ func (p *GetMFAqrResp) String() string {
 }
 
 type BindMFAReq struct {
-	Authorization string `thrift:"authorization,1" form:"authorization" json:"authorization" query:"authorization"`
-	MfaCode       string `thrift:"mfa_code,2" form:"mfa_code" json:"mfa_code" query:"mfa_code"`
+	MfaCode string `thrift:"mfa_code,1" form:"mfa_code" json:"mfa_code" query:"mfa_code"`
 }
 
 func NewBindMFAReq() *BindMFAReq {
@@ -203,10 +250,6 @@ func NewBindMFAReq() *BindMFAReq {
 }
 
 func (p *BindMFAReq) InitDefault() {
-}
-
-func (p *BindMFAReq) GetAuthorization() (v string) {
-	return p.Authorization
 }
 
 func (p *BindMFAReq) GetMfaCode() (v string) {
@@ -252,8 +295,7 @@ func (p *BindMFAResp) String() string {
 }
 
 type UnbindMFAReq struct {
-	Authorization string `thrift:"authorization,1" form:"authorization" json:"authorization" query:"authorization"`
-	MfaCode       string `thrift:"mfa_code,2" form:"mfa_code" json:"mfa_code" query:"mfa_code"`
+	MfaCode string `thrift:"mfa_code,1" form:"mfa_code" json:"mfa_code" query:"mfa_code"`
 }
 
 func NewUnbindMFAReq() *UnbindMFAReq {
@@ -261,10 +303,6 @@ func NewUnbindMFAReq() *UnbindMFAReq {
 }
 
 func (p *UnbindMFAReq) InitDefault() {
-}
-
-func (p *UnbindMFAReq) GetAuthorization() (v string) {
-	return p.Authorization
 }
 
 func (p *UnbindMFAReq) GetMfaCode() (v string) {
@@ -310,7 +348,7 @@ func (p *UnbindMFAResp) String() string {
 }
 
 type RefreshTokenReq struct {
-	Authorization string `thrift:"authorization,1" form:"authorization" json:"authorization" query:"authorization"`
+	RefreshToken string `thrift:"refresh_token,1" form:"refresh_token" json:"refresh_token" query:"refresh_token"`
 }
 
 func NewRefreshTokenReq() *RefreshTokenReq {
@@ -320,8 +358,8 @@ func NewRefreshTokenReq() *RefreshTokenReq {
 func (p *RefreshTokenReq) InitDefault() {
 }
 
-func (p *RefreshTokenReq) GetAuthorization() (v string) {
-	return p.Authorization
+func (p *RefreshTokenReq) GetRefreshToken() (v string) {
+	return p.RefreshToken
 }
 
 func (p *RefreshTokenReq) String() string {
@@ -332,8 +370,8 @@ func (p *RefreshTokenReq) String() string {
 }
 
 type RefreshTokenResp struct {
-	Base          *model.BaseResp `thrift:"base,1" form:"base" json:"base" query:"base"`
-	Authorization string          `thrift:"authorization,2" form:"authorization" json:"authorization" query:"authorization"`
+	Base        *model.BaseResp `thrift:"base,1" form:"base" json:"base" query:"base"`
+	AccessToken string          `thrift:"access_token,2" form:"access_token" json:"access_token" query:"access_token"`
 }
 
 func NewRefreshTokenResp() *RefreshTokenResp {
@@ -352,8 +390,8 @@ func (p *RefreshTokenResp) GetBase() (v *model.BaseResp) {
 	return p.Base
 }
 
-func (p *RefreshTokenResp) GetAuthorization() (v string) {
-	return p.Authorization
+func (p *RefreshTokenResp) GetAccessToken() (v string) {
+	return p.AccessToken
 }
 
 func (p *RefreshTokenResp) IsSetBase() bool {
@@ -369,7 +407,6 @@ func (p *RefreshTokenResp) String() string {
 
 // user部分
 type GetUserInfoReq struct {
-	Authorization string `thrift:"authorization,1" form:"authorization" json:"authorization" query:"authorization"`
 }
 
 func NewGetUserInfoReq() *GetUserInfoReq {
@@ -377,10 +414,6 @@ func NewGetUserInfoReq() *GetUserInfoReq {
 }
 
 func (p *GetUserInfoReq) InitDefault() {
-}
-
-func (p *GetUserInfoReq) GetAuthorization() (v string) {
-	return p.Authorization
 }
 
 func (p *GetUserInfoReq) String() string {
@@ -436,8 +469,7 @@ func (p *GetUserInfoResp) String() string {
 }
 
 type UploadAvatarReq struct {
-	Authorization string `thrift:"authorization,1" form:"authorization" json:"authorization" query:"authorization"`
-	Avatar        string `thrift:"avatar,2" form:"avatar" json:"avatar" query:"avatar"`
+	Avatar string `thrift:"avatar,1" form:"avatar" json:"avatar" query:"avatar"`
 }
 
 func NewUploadAvatarReq() *UploadAvatarReq {
@@ -445,10 +477,6 @@ func NewUploadAvatarReq() *UploadAvatarReq {
 }
 
 func (p *UploadAvatarReq) InitDefault() {
-}
-
-func (p *UploadAvatarReq) GetAuthorization() (v string) {
-	return p.Authorization
 }
 
 func (p *UploadAvatarReq) GetAvatar() (v string) {
@@ -494,8 +522,7 @@ func (p *UploadAvatarResp) String() string {
 }
 
 type UpdateSignatureReq struct {
-	Authorization string `thrift:"authorization,1" form:"authorization" json:"authorization" query:"authorization"`
-	Signature     string `thrift:"signature,2" form:"signature" json:"signature" query:"signature"`
+	Signature string `thrift:"signature,1" form:"signature" json:"signature" query:"signature"`
 }
 
 func NewUpdateSignatureReq() *UpdateSignatureReq {
@@ -503,10 +530,6 @@ func NewUpdateSignatureReq() *UpdateSignatureReq {
 }
 
 func (p *UpdateSignatureReq) InitDefault() {
-}
-
-func (p *UpdateSignatureReq) GetAuthorization() (v string) {
-	return p.Authorization
 }
 
 func (p *UpdateSignatureReq) GetSignature() (v string) {
@@ -555,6 +578,8 @@ type AuthService interface {
 	Register(ctx context.Context, req *RegisterReq) (r *RegisterResp, err error)
 
 	Login(ctx context.Context, req *LoginReq) (r *LoginResp, err error)
+
+	Logout(ctx context.Context, req *LogoutReq) (r *LogoutResp, err error)
 
 	GetMFAqr(ctx context.Context, req *GetMFAqrReq) (r *GetMFAqrResp, err error)
 

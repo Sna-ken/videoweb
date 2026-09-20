@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/Sna-ken/videoweb/pkg/db/mysql"
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/server"
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -21,7 +23,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	db, err := mysql.NewMySQL(cfg.MySQL)
+	mysqldb, err := mysql.NewMySQL(&cfg.MySQL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,7 +41,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	authdb := repository.NewAuthDB(db)
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     net.JoinHostPort(cfg.Redis.Host, cfg.Redis.Port),
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB,
+	})
+
+	if err := redisClient.Ping(context.Background()).Err(); err != nil {
+		log.Fatal(err)
+	}
+	defer redisClient.Close()
+
+	authdb := repository.NewAuthDB(mysqldb, redisClient)
+
 	authService := authservice.NewAuthService(authdb)
 	authHandler := handler.NewAuthServiceImpl(authService, userClient)
 	svr := authserver.NewServer(authHandler, server.WithServiceAddr(address))

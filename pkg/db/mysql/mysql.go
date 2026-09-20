@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewMySQL(cfg config.MySQLConfig) (*gorm.DB, error) {
+func NewMySQL(cfg *config.MySQLConfig) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		cfg.Username,

@@ -16,9 +16,11 @@ const (
 	InternalDatabaseErrorCode = 100009 //内部数据库错误
 
 	// auth错误 100101-100200
-	MFAcodeErrorCode        = 100101 //MFA验证码错误
-	MFAcodeExpiredErrorCode = 100102 //MFA验证码过期
-	MFAcodeEmptyErrorCode   = 100102 //MFA验证码为空
+	MFAcodeErrorCode           = 100101 //MFA验证码错误
+	MFAcodeExpiredErrorCode    = 100102 //MFA验证码过期
+	MFAcodeEmptyErrorCode      = 100103 //MFA验证码为空
+	MFANotEnabledErrorCode     = 100104 //MFA未启用
+	PasswordIncorrectErrorCode = 100105 //密码错误
 
 	// user错误 100201-100300
 	UserNotFoundErrorCode    = 100201 //用户不存在
