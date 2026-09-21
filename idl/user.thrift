@@ -3,6 +3,7 @@ namespace go user
 include "model.thrift"
 
 struct GetUserInfoReq{
+    1:string id
 }
 
 struct GetUserInfoResp{
@@ -11,7 +12,8 @@ struct GetUserInfoResp{
 }
 
 struct UploadAvatarReq{
-    1: string avatar,
+    1:string id
+    2: string avatar,
 }
 
 struct UploadAvatarResp{
@@ -19,7 +21,8 @@ struct UploadAvatarResp{
 }
 
 struct UpdateSignatureReq{
-    1: string signature,
+    1:string id
+    2: string signature,
 }
 
 struct UpdateSignatureResp{

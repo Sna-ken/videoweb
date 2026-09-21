@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/Sna-ken/videoweb/pkg/constants"
 	"github.com/Sna-ken/videoweb/pkg/errno"
 	"github.com/Sna-ken/videoweb/pkg/jwt"
 	"github.com/Sna-ken/videoweb/pkg/utils"
@@ -31,9 +32,14 @@ func (s *AuthService) Login(ctx context.Context, username, password, mfa_code st
 		return "", "", errno.Wrap(errno.NewErr(errno.MFANotEnabledErrorCode, "MFA未启用"), nil)
 	}
 
-	accessToken, refreshToken, jwterr := jwt.GenerateToken(info.UserID)
-	if jwterr != nil {
-		return "", "", jwterr
+	accessToken, err := jwt.GenerateToken(info.UserID, constants.TypeAccessToken)
+	if err != nil {
+		return "", "", err
+	}
+
+	refreshToken, err := jwt.GenerateToken(info.UserID, constants.TypeRefreshToken)
+	if err != nil {
+		return "", "", err
 	}
 
 	err = s.authdb.SaveRefreshToken(ctx, refreshToken)

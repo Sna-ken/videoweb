@@ -9,6 +9,7 @@ import (
 	api "github.com/Sna-ken/videoweb/api/model/api"
 	"github.com/Sna-ken/videoweb/kitex_gen/auth"
 	"github.com/Sna-ken/videoweb/pkg/base"
+	"github.com/Sna-ken/videoweb/pkg/constants"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
@@ -68,13 +69,22 @@ func RefreshToken(ctx context.Context, c *app.RequestContext) {
 	var req api.RefreshTokenReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		base.ErrHTTPResp(c, err)
 		return
 	}
 
-	resp := new(api.RefreshTokenResp)
+	userID := c.GetString(constants.UserIDPrefix)
+	RPCresp, err := client.AuthServiceClient.RefreshToken(ctx, &auth.RefreshTokenReq{
+		Id:           userID,
+		RefreshToken: req.RefreshToken,
+	})
 
-	c.JSON(consts.StatusOK, resp)
+	if err != nil {
+		base.ErrHTTPRespWithData(c, err, RPCresp)
+		return
+	}
+
+	base.SuccessHTTPRespWithData(c, RPCresp)
 }
 
 // Register .

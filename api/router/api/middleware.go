@@ -3,6 +3,7 @@
 package api
 
 import (
+	"github.com/Sna-ken/videoweb/api/mw"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
@@ -42,18 +43,21 @@ func _mfaMw() []app.HandlerFunc {
 }
 
 func _bindmfaMw() []app.HandlerFunc {
-	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.Authorization(),
+	}
 }
 
 func _getmfaqrMw() []app.HandlerFunc {
-	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.Authorization(),
+	}
 }
 
 func _unbindmfaMw() []app.HandlerFunc {
-	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.Authorization(),
+	}
 }
 
 func _tokenMw() []app.HandlerFunc {
@@ -62,18 +66,21 @@ func _tokenMw() []app.HandlerFunc {
 }
 
 func _refreshtokenMw() []app.HandlerFunc {
-	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.RefreshAuthorization(),
+	}
 }
 
 func _userMw() []app.HandlerFunc {
-	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.Authorization(),
+	}
 }
 
 func _uploadavatarMw() []app.HandlerFunc {
-	// your code...
-	return nil
+	return []app.HandlerFunc{
+		mw.Authorization(),
+	}
 }
 
 func _userifoMw() []app.HandlerFunc {

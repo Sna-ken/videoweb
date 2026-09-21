@@ -167,6 +167,8 @@ func (p *LoginResp) String() string {
 }
 
 type LogoutReq struct {
+	Id           string `thrift:"id,1" frugal:"1,default,string" json:"id"`
+	RefreshToken string `thrift:"refresh_token,2" frugal:"2,default,string" json:"refresh_token"`
 }
 
 func NewLogoutReq() *LogoutReq {
@@ -174,6 +176,20 @@ func NewLogoutReq() *LogoutReq {
 }
 
 func (p *LogoutReq) InitDefault() {
+}
+
+func (p *LogoutReq) GetId() (v string) {
+	return p.Id
+}
+
+func (p *LogoutReq) GetRefreshToken() (v string) {
+	return p.RefreshToken
+}
+func (p *LogoutReq) SetId(val string) {
+	p.Id = val
+}
+func (p *LogoutReq) SetRefreshToken(val string) {
+	p.RefreshToken = val
 }
 
 func (p *LogoutReq) String() string {
@@ -218,6 +234,7 @@ func (p *LogoutResp) String() string {
 }
 
 type GetMFAqrReq struct {
+	Id string `thrift:"id,1" frugal:"1,default,string" json:"id"`
 }
 
 func NewGetMFAqrReq() *GetMFAqrReq {
@@ -225,6 +242,13 @@ func NewGetMFAqrReq() *GetMFAqrReq {
 }
 
 func (p *GetMFAqrReq) InitDefault() {
+}
+
+func (p *GetMFAqrReq) GetId() (v string) {
+	return p.Id
+}
+func (p *GetMFAqrReq) SetId(val string) {
+	p.Id = val
 }
 
 func (p *GetMFAqrReq) String() string {
@@ -277,7 +301,8 @@ func (p *GetMFAqrResp) String() string {
 }
 
 type BindMFAReq struct {
-	MfaCode string `thrift:"mfa_code,1" frugal:"1,default,string" json:"mfa_code"`
+	Id      string `thrift:"id,1" frugal:"1,default,string" json:"id"`
+	MfaCode string `thrift:"mfa_code,2" frugal:"2,default,string" json:"mfa_code"`
 }
 
 func NewBindMFAReq() *BindMFAReq {
@@ -287,8 +312,15 @@ func NewBindMFAReq() *BindMFAReq {
 func (p *BindMFAReq) InitDefault() {
 }
 
+func (p *BindMFAReq) GetId() (v string) {
+	return p.Id
+}
+
 func (p *BindMFAReq) GetMfaCode() (v string) {
 	return p.MfaCode
+}
+func (p *BindMFAReq) SetId(val string) {
+	p.Id = val
 }
 func (p *BindMFAReq) SetMfaCode(val string) {
 	p.MfaCode = val
@@ -336,6 +368,7 @@ func (p *BindMFAResp) String() string {
 }
 
 type UnbindMFAReq struct {
+	Id      string `thrift:"id,1" frugal:"1,default,string" json:"id"`
 	MfaCode string `thrift:"mfa_code,2" frugal:"2,default,string" json:"mfa_code"`
 }
 
@@ -346,8 +379,15 @@ func NewUnbindMFAReq() *UnbindMFAReq {
 func (p *UnbindMFAReq) InitDefault() {
 }
 
+func (p *UnbindMFAReq) GetId() (v string) {
+	return p.Id
+}
+
 func (p *UnbindMFAReq) GetMfaCode() (v string) {
 	return p.MfaCode
+}
+func (p *UnbindMFAReq) SetId(val string) {
+	p.Id = val
 }
 func (p *UnbindMFAReq) SetMfaCode(val string) {
 	p.MfaCode = val
@@ -395,7 +435,8 @@ func (p *UnbindMFAResp) String() string {
 }
 
 type RefreshTokenReq struct {
-	RefreshToken string `thrift:"refresh_token,1" frugal:"1,default,string" json:"refresh_token"`
+	Id           string `thrift:"id,1" frugal:"1,default,string" json:"id"`
+	RefreshToken string `thrift:"refresh_token,2" frugal:"2,default,string" json:"refresh_token"`
 }
 
 func NewRefreshTokenReq() *RefreshTokenReq {
@@ -405,8 +446,15 @@ func NewRefreshTokenReq() *RefreshTokenReq {
 func (p *RefreshTokenReq) InitDefault() {
 }
 
+func (p *RefreshTokenReq) GetId() (v string) {
+	return p.Id
+}
+
 func (p *RefreshTokenReq) GetRefreshToken() (v string) {
 	return p.RefreshToken
+}
+func (p *RefreshTokenReq) SetId(val string) {
+	p.Id = val
 }
 func (p *RefreshTokenReq) SetRefreshToken(val string) {
 	p.RefreshToken = val

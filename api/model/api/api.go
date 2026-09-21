@@ -141,6 +141,7 @@ func (p *LoginResp) String() string {
 }
 
 type LogoutReq struct {
+	RefreshToken string `thrift:"refresh_token,1" form:"refresh_token" json:"refresh_token" query:"refresh_token"`
 }
 
 func NewLogoutReq() *LogoutReq {
@@ -148,6 +149,10 @@ func NewLogoutReq() *LogoutReq {
 }
 
 func (p *LogoutReq) InitDefault() {
+}
+
+func (p *LogoutReq) GetRefreshToken() (v string) {
+	return p.RefreshToken
 }
 
 func (p *LogoutReq) String() string {

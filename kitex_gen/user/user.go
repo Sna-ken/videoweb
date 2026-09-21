@@ -9,6 +9,7 @@ import (
 )
 
 type GetUserInfoReq struct {
+	Id string `thrift:"id,1" frugal:"1,default,string" json:"id"`
 }
 
 func NewGetUserInfoReq() *GetUserInfoReq {
@@ -16,6 +17,13 @@ func NewGetUserInfoReq() *GetUserInfoReq {
 }
 
 func (p *GetUserInfoReq) InitDefault() {
+}
+
+func (p *GetUserInfoReq) GetId() (v string) {
+	return p.Id
+}
+func (p *GetUserInfoReq) SetId(val string) {
+	p.Id = val
 }
 
 func (p *GetUserInfoReq) String() string {
@@ -77,7 +85,8 @@ func (p *GetUserInfoResp) String() string {
 }
 
 type UploadAvatarReq struct {
-	Avatar string `thrift:"avatar,1" frugal:"1,default,string" json:"avatar"`
+	Id     string `thrift:"id,1" frugal:"1,default,string" json:"id"`
+	Avatar string `thrift:"avatar,2" frugal:"2,default,string" json:"avatar"`
 }
 
 func NewUploadAvatarReq() *UploadAvatarReq {
@@ -87,8 +96,15 @@ func NewUploadAvatarReq() *UploadAvatarReq {
 func (p *UploadAvatarReq) InitDefault() {
 }
 
+func (p *UploadAvatarReq) GetId() (v string) {
+	return p.Id
+}
+
 func (p *UploadAvatarReq) GetAvatar() (v string) {
 	return p.Avatar
+}
+func (p *UploadAvatarReq) SetId(val string) {
+	p.Id = val
 }
 func (p *UploadAvatarReq) SetAvatar(val string) {
 	p.Avatar = val
@@ -136,7 +152,8 @@ func (p *UploadAvatarResp) String() string {
 }
 
 type UpdateSignatureReq struct {
-	Signature string `thrift:"signature,1" frugal:"1,default,string" json:"signature"`
+	Id        string `thrift:"id,1" frugal:"1,default,string" json:"id"`
+	Signature string `thrift:"signature,2" frugal:"2,default,string" json:"signature"`
 }
 
 func NewUpdateSignatureReq() *UpdateSignatureReq {
@@ -146,8 +163,15 @@ func NewUpdateSignatureReq() *UpdateSignatureReq {
 func (p *UpdateSignatureReq) InitDefault() {
 }
 
+func (p *UpdateSignatureReq) GetId() (v string) {
+	return p.Id
+}
+
 func (p *UpdateSignatureReq) GetSignature() (v string) {
 	return p.Signature
+}
+func (p *UpdateSignatureReq) SetId(val string) {
+	p.Id = val
 }
 func (p *UpdateSignatureReq) SetSignature(val string) {
 	p.Signature = val

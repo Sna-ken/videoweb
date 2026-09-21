@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	usermodel "github.com/Sna-ken/videoweb/kitex_gen/user"
@@ -41,13 +42,14 @@ func TestCreateUserCallsServiceAndBuildsResponse(t *testing.T) {
 }
 
 func TestCreateUserBuildsBusinessErrorResponse(t *testing.T) {
-	service := &stubUserService{err: errno.Wrap(errno.ParamEmptyError, nil)}
+	serviceErr := errno.Wrap(errno.ParamEmptyError, nil)
+	service := &stubUserService{err: serviceErr}
 	handler := &UserServiceImpl{service: service}
 
 	resp, err := handler.CreateUser(context.Background(), nil)
 
-	if err != nil {
-		t.Fatalf("CreateUser() transport error = %v, want nil", err)
+	if !errors.Is(err, serviceErr) {
+		t.Fatalf("CreateUser() error = %v, want %v", err, serviceErr)
 	}
 	if resp.Base.Code != errno.ParamEmptyErrorCode {
 		t.Fatalf("CreateUser() code = %d, want %d", resp.Base.Code, errno.ParamEmptyErrorCode)

@@ -42,7 +42,7 @@ func (s *UserServiceImpl) UpdateSignature(ctx context.Context, req *user.UpdateS
 // CreateUser implements the UserServiceImpl interface.
 func (s *UserServiceImpl) CreateUser(ctx context.Context, req *user.CreateUserReq) (resp *user.CreateUserResp, err error) {
 	var userID, username string
-	if req.UserId != "" && req.Username != "" {
+	if req != nil && req.UserId != "" && req.Username != "" {
 		userID = req.UserId
 		username = req.Username
 	}

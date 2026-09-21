@@ -13,15 +13,20 @@ import (
 )
 
 type stubRegisterService struct {
-	userID        string
-	err           error
-	accessToken   string
-	refreshToken  string
-	loginErr      error
-	loginCalls    int
-	loginUsername string
-	loginPassword string
-	loginMFACode  string
+	userID              string
+	err                 error
+	accessToken         string
+	refreshToken        string
+	loginErr            error
+	loginCalls          int
+	loginUsername       string
+	loginPassword       string
+	loginMFACode        string
+	refreshAccessToken  string
+	refreshErr          error
+	refreshCalls        int
+	refreshUserID       string
+	refreshRequestToken string
 }
 
 func (s *stubRegisterService) Register(context.Context, string, string) (string, error) {
@@ -34,6 +39,13 @@ func (s *stubRegisterService) Login(_ context.Context, username, password, mfaCo
 	s.loginPassword = password
 	s.loginMFACode = mfaCode
 	return s.accessToken, s.refreshToken, s.loginErr
+}
+
+func (s *stubRegisterService) RefreshToken(_ context.Context, userID, refreshToken string) (string, error) {
+	s.refreshCalls++
+	s.refreshUserID = userID
+	s.refreshRequestToken = refreshToken
+	return s.refreshAccessToken, s.refreshErr
 }
 
 type stubUserCreator struct {
@@ -79,17 +91,18 @@ func TestRegisterCreatesAuthAccountAndUserProfile(t *testing.T) {
 
 func TestRegisterSkipsUserRPCWhenAuthRegistrationFails(t *testing.T) {
 	creator := &stubUserCreator{}
+	registerErr := errno.Wrap(errno.ParamEmptyError, nil)
 	handler := &AuthServiceImpl{
 		service: &stubRegisterService{
-			err: errno.Wrap(errno.ParamEmptyError, nil),
+			err: registerErr,
 		},
 		userClient: creator,
 	}
 
 	resp, err := handler.Register(context.Background(), &authmodel.RegisterReq{})
 
-	if err != nil {
-		t.Fatalf("Register() transport error = %v, want nil", err)
+	if !errors.Is(err, registerErr) {
+		t.Fatalf("Register() error = %v, want %v", err, registerErr)
 	}
 	if resp.Base.Code != errno.ParamEmptyErrorCode {
 		t.Fatalf("Register() code = %d, want %d", resp.Base.Code, errno.ParamEmptyErrorCode)
@@ -100,7 +113,8 @@ func TestRegisterSkipsUserRPCWhenAuthRegistrationFails(t *testing.T) {
 }
 
 func TestRegisterWrapsUserRPCError(t *testing.T) {
-	creator := &stubUserCreator{err: errors.New("rpc unavailable")}
+	rpcErr := errors.New("rpc unavailable")
+	creator := &stubUserCreator{err: rpcErr}
 	handler := &AuthServiceImpl{
 		service:    &stubRegisterService{userID: "user-id"},
 		userClient: creator,
@@ -108,8 +122,8 @@ func TestRegisterWrapsUserRPCError(t *testing.T) {
 
 	resp, err := handler.Register(context.Background(), &authmodel.RegisterReq{Username: "alice", Password: "Abc123!"})
 
-	if err != nil {
-		t.Fatalf("Register() transport error = %v, want nil", err)
+	if !errors.Is(err, rpcErr) {
+		t.Fatalf("Register() error = %v, want cause %v", err, rpcErr)
 	}
 	if resp.Base.Code != errno.InternalServiceErrorCode {
 		t.Fatalf("Register() code = %d, want %d", resp.Base.Code, errno.InternalServiceErrorCode)
@@ -127,8 +141,8 @@ func TestRegisterPropagatesUserBusinessError(t *testing.T) {
 
 	resp, err := handler.Register(context.Background(), &authmodel.RegisterReq{Username: "alice", Password: "Abc123!"})
 
-	if err != nil {
-		t.Fatalf("Register() transport error = %v, want nil", err)
+	if got := errno.Convert(err).Code(); got != errno.UserHasExistedErrorCode {
+		t.Fatalf("Register() error code = %d, want %d", got, errno.UserHasExistedErrorCode)
 	}
 	if resp.Base.Code != errno.UserHasExistedErrorCode {
 		t.Fatalf("Register() code = %d, want %d", resp.Base.Code, errno.UserHasExistedErrorCode)
@@ -188,5 +202,58 @@ func TestLoginReturnsServiceError(t *testing.T) {
 	}
 	if resp.AccessToken != "" || resp.RefreshToken != "" {
 		t.Fatalf("Login() tokens = (%q, %q), want empty tokens", resp.AccessToken, resp.RefreshToken)
+	}
+}
+
+func TestRefreshTokenReturnsAccessToken(t *testing.T) {
+	service := &stubRegisterService{refreshAccessToken: "new-access-token"}
+	handler := &AuthServiceImpl{service: service}
+
+	resp, err := handler.RefreshToken(context.Background(), &authmodel.RefreshTokenReq{
+		Id:           "user-id",
+		RefreshToken: "refresh-token",
+	})
+
+	if err != nil {
+		t.Fatalf("RefreshToken() error = %v, want nil", err)
+	}
+	if resp.Base.Code != errno.SuccessCode {
+		t.Fatalf("RefreshToken() code = %d, want %d", resp.Base.Code, errno.SuccessCode)
+	}
+	if resp.AccessToken != "new-access-token" {
+		t.Fatalf("RefreshToken() access token = %q, want new-access-token", resp.AccessToken)
+	}
+	if service.refreshCalls != 1 {
+		t.Fatalf("service RefreshToken() calls = %d, want 1", service.refreshCalls)
+	}
+	if service.refreshUserID != "user-id" {
+		t.Fatalf("service RefreshToken() user ID = %q, want user-id", service.refreshUserID)
+	}
+	if service.refreshRequestToken != "refresh-token" {
+		t.Fatalf(
+			"service RefreshToken() argument = %q, want refresh-token",
+			service.refreshRequestToken,
+		)
+	}
+}
+
+func TestRefreshTokenReturnsServiceError(t *testing.T) {
+	refreshErr := errno.Wrap(errno.AuthInvalidError, errors.New("refresh token invalid"))
+	service := &stubRegisterService{refreshErr: refreshErr}
+	handler := &AuthServiceImpl{service: service}
+
+	resp, err := handler.RefreshToken(context.Background(), &authmodel.RefreshTokenReq{
+		Id:           "user-id",
+		RefreshToken: "invalid-refresh-token",
+	})
+
+	if !errors.Is(err, refreshErr) {
+		t.Fatalf("RefreshToken() error = %v, want %v", err, refreshErr)
+	}
+	if resp.Base.Code != errno.AuthInvalidErrorCode {
+		t.Fatalf("RefreshToken() code = %d, want %d", resp.Base.Code, errno.AuthInvalidErrorCode)
+	}
+	if resp.AccessToken != "" {
+		t.Fatalf("RefreshToken() access token = %q, want empty", resp.AccessToken)
 	}
 }

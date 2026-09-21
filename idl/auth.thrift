@@ -24,6 +24,8 @@ struct LoginResp{
 }
 
 struct LogoutReq{
+    1:string id
+    2: string refresh_token,
 }
 
 struct LogoutResp{
@@ -31,6 +33,7 @@ struct LogoutResp{
 }
 
 struct GetMFAqrReq{
+    1:string id
 }
 
 struct GetMFAqrResp{
@@ -39,7 +42,8 @@ struct GetMFAqrResp{
 }
 
 struct BindMFAReq{
-    1: string mfa_code,
+    1:string id
+    2: string mfa_code,
 }
 
 struct BindMFAResp{
@@ -47,6 +51,7 @@ struct BindMFAResp{
 }
 
 struct UnbindMFAReq{
+    1:string id
     2: string mfa_code,
 }
 
@@ -55,7 +60,8 @@ struct UnbindMFAResp{
 }
 
 struct RefreshTokenReq{
-    1: string refresh_token,
+    1: string id,
+    2: string refresh_token,
 }
 
 struct RefreshTokenResp{

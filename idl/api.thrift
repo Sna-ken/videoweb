@@ -25,6 +25,7 @@ struct LoginResp{
 }
 
 struct LogoutReq{
+    1: string refresh_token,
 }
 
 struct LogoutResp{

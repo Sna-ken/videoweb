@@ -15,6 +15,7 @@ import (
 type registerService interface {
 	Register(ctx context.Context, username, password string) (string, error)
 	Login(ctx context.Context, username, password, mfa_code string) (string, string, error)
+	RefreshToken(ctx context.Context, userID, refreshToken string) (string, error)
 }
 
 type userCreator interface {
@@ -117,6 +118,16 @@ func (s *AuthServiceImpl) UnbindMFA(ctx context.Context, req *auth.UnbindMFAReq)
 
 // RefreshToken implements the AuthServiceImpl interface.
 func (s *AuthServiceImpl) RefreshToken(ctx context.Context, req *auth.RefreshTokenReq) (resp *auth.RefreshTokenResp, err error) {
-	// TODO: Your code here...
-	return
+
+	accesstoken, err := s.service.RefreshToken(ctx, req.Id, req.RefreshToken)
+	if err != nil {
+		return &auth.RefreshTokenResp{
+			Base: base.ErrsRPCResp(err),
+		}, err
+	}
+
+	return &auth.RefreshTokenResp{
+		Base:        base.SuccessRPCResp(),
+		AccessToken: accesstoken,
+	}, nil
 }

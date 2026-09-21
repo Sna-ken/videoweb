@@ -4,14 +4,14 @@ import (
 	"errors"
 	"unicode"
 
-	"github.com/Sna-ken/videoweb/pkg/constans"
+	"github.com/Sna-ken/videoweb/pkg/constants"
 )
 
 func CheckPasswordValid(password string) (bool, error) {
-	if len(password) < constans.PasswordMinLength {
+	if len(password) < constants.PasswordMinLength {
 		return false, errors.New("密码长度小于6")
 	}
-	if len(password) > constans.PasswordMaxLength {
+	if len(password) > constants.PasswordMaxLength {
 		return false, errors.New("密码长度大于20")
 	}
 
@@ -37,7 +37,7 @@ func CheckPasswordValid(password string) (bool, error) {
 			categoryCount++
 		}
 	}
-	if categoryCount < constans.PasswordLeastCategoryCount {
+	if categoryCount < constants.PasswordLeastCategoryCount {
 		return false, errors.New("密码中必须至少含有大小写字母、数字、特殊符号中任意三种")
 	}
 

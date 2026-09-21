@@ -1,4 +1,4 @@
-package constans
+package constants
 
 import "time"
 
@@ -11,4 +11,6 @@ var (
 	Issuer = "Sna-ken"
 
 	RefreshTokenKeyPrefix = "refreshtoken:"
+	UserIDPrefix          = "user_id"
+	AuthorizationHeader   = "Authorization"
 )

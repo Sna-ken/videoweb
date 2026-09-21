@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/Sna-ken/videoweb/internal/auth/repository"
+	"github.com/Sna-ken/videoweb/pkg/constants"
 	"github.com/Sna-ken/videoweb/pkg/db/model"
 	"github.com/Sna-ken/videoweb/pkg/errno"
 	"github.com/Sna-ken/videoweb/pkg/jwt"
@@ -79,7 +80,7 @@ func TestLoginRejectsInvalidCredentialsAndMFA(t *testing.T) {
 					Return(tt.mfaValid).
 					Build()
 				tokenMock := mockey.Mock(jwt.GenerateToken).
-					Return("access-token", "refresh-token", nil).
+					Return("unused-token", nil).
 					Build()
 				saveMock := mockey.Mock((*repository.AuthDB).SaveRefreshToken).
 					Return(nil).
@@ -121,43 +122,57 @@ func TestLoginRejectsInvalidCredentialsAndMFA(t *testing.T) {
 }
 
 func TestLoginGeneratesAndPersistsTokens(t *testing.T) {
-	tokenErr := errno.Wrap(errno.NewErr(errno.InternalServiceErrorCode, "token generation failed"), nil)
+	accessTokenErr := errno.Wrap(errno.NewErr(errno.InternalServiceErrorCode, "access token generation failed"), nil)
+	refreshTokenErr := errno.Wrap(errno.NewErr(errno.InternalServiceErrorCode, "refresh token generation failed"), nil)
 	databaseErr := errors.New("database unavailable")
 
 	tests := []struct {
-		name          string
-		mfaEnabled    bool
-		mfaCode       string
-		tokenErr      error
-		saveErr       error
-		wantCode      int64
-		wantCause     error
-		wantMFACalls  int
-		wantSaveCalls int
+		name            string
+		mfaEnabled      bool
+		mfaCode         string
+		accessTokenErr  error
+		refreshTokenErr error
+		saveErr         error
+		wantCode        int64
+		wantCause       error
+		wantMFACalls    int
+		wantTokenCalls  int
+		wantSaveCalls   int
 	}{
 		{
-			name:          "success without MFA",
-			wantSaveCalls: 1,
+			name:           "success without MFA",
+			wantTokenCalls: 2,
+			wantSaveCalls:  1,
 		},
 		{
-			name:          "success with MFA",
-			mfaEnabled:    true,
-			mfaCode:       "123456",
-			wantMFACalls:  1,
-			wantSaveCalls: 1,
+			name:           "success with MFA",
+			mfaEnabled:     true,
+			mfaCode:        "123456",
+			wantMFACalls:   1,
+			wantTokenCalls: 2,
+			wantSaveCalls:  1,
 		},
 		{
-			name:      "token generation failed",
-			tokenErr:  tokenErr,
-			wantCode:  errno.InternalServiceErrorCode,
-			wantCause: tokenErr,
+			name:           "access token generation failed",
+			accessTokenErr: accessTokenErr,
+			wantCode:       errno.InternalServiceErrorCode,
+			wantCause:      accessTokenErr,
+			wantTokenCalls: 1,
 		},
 		{
-			name:          "refresh token persistence failed",
-			saveErr:       databaseErr,
-			wantCode:      errno.InternalDatabaseErrorCode,
-			wantCause:     databaseErr,
-			wantSaveCalls: 1,
+			name:            "refresh token generation failed",
+			refreshTokenErr: refreshTokenErr,
+			wantCode:        errno.InternalServiceErrorCode,
+			wantCause:       refreshTokenErr,
+			wantTokenCalls:  2,
+		},
+		{
+			name:           "refresh token persistence failed",
+			saveErr:        databaseErr,
+			wantCode:       errno.InternalDatabaseErrorCode,
+			wantCause:      databaseErr,
+			wantTokenCalls: 2,
+			wantSaveCalls:  1,
 		},
 	}
 
@@ -174,8 +189,21 @@ func TestLoginGeneratesAndPersistsTokens(t *testing.T) {
 				mfaMock := mockey.Mock(utils.ValidateMFA).
 					Return(true).
 					Build()
+				var generatedUserIDs, generatedTypes []string
 				tokenMock := mockey.Mock(jwt.GenerateToken).
-					Return("access-token", "refresh-token", tt.tokenErr).
+					To(func(userID, tokenType string) (string, error) {
+						generatedUserIDs = append(generatedUserIDs, userID)
+						generatedTypes = append(generatedTypes, tokenType)
+						switch tokenType {
+						case constants.TypeAccessToken:
+							return "access-token", tt.accessTokenErr
+						case constants.TypeRefreshToken:
+							return "refresh-token", tt.refreshTokenErr
+						default:
+							t.Fatalf("GenerateToken() token type = %q, want access_token or refresh_token", tokenType)
+							return "", nil
+						}
+					}).
 					Build()
 
 				var savedToken string
@@ -198,13 +226,27 @@ func TestLoginGeneratesAndPersistsTokens(t *testing.T) {
 				if tt.wantCause != nil && !errors.Is(err, tt.wantCause) {
 					t.Fatalf("Login() error = %v, want cause %v", err, tt.wantCause)
 				}
-				if searchMock.Times() != 1 || passwordMock.Times() != 1 || tokenMock.Times() != 1 {
+				if searchMock.Times() != 1 || passwordMock.Times() != 1 {
 					t.Fatalf(
-						"dependency calls = search:%d password:%d token:%d, want 1 each",
+						"dependency calls = search:%d password:%d, want 1 each",
 						searchMock.Times(),
 						passwordMock.Times(),
-						tokenMock.Times(),
 					)
+				}
+				if tokenMock.Times() != tt.wantTokenCalls {
+					t.Fatalf("GenerateToken() calls = %d, want %d", tokenMock.Times(), tt.wantTokenCalls)
+				}
+				wantTypes := []string{constants.TypeAccessToken, constants.TypeRefreshToken}
+				for i := 0; i < tt.wantTokenCalls; i++ {
+					if generatedUserIDs[i] != "user-id" || generatedTypes[i] != wantTypes[i] {
+						t.Fatalf(
+							"GenerateToken() call %d = (%q, %q), want (user-id, %q)",
+							i+1,
+							generatedUserIDs[i],
+							generatedTypes[i],
+							wantTypes[i],
+						)
+					}
 				}
 				if mfaMock.Times() != tt.wantMFACalls {
 					t.Fatalf("ValidateMFA() calls = %d, want %d", mfaMock.Times(), tt.wantMFACalls)
