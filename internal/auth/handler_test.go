@@ -27,6 +27,9 @@ type stubRegisterService struct {
 	refreshCalls        int
 	refreshUserID       string
 	refreshRequestToken string
+	logoutErr           error
+	logoutCalls         int
+	logoutRefreshToken  string
 }
 
 func (s *stubRegisterService) Register(context.Context, string, string) (string, error) {
@@ -46,6 +49,12 @@ func (s *stubRegisterService) RefreshToken(_ context.Context, userID, refreshTok
 	s.refreshUserID = userID
 	s.refreshRequestToken = refreshToken
 	return s.refreshAccessToken, s.refreshErr
+}
+
+func (s *stubRegisterService) Logout(_ context.Context, refreshToken string) error {
+	s.logoutCalls++
+	s.logoutRefreshToken = refreshToken
+	return s.logoutErr
 }
 
 type stubUserCreator struct {
@@ -255,5 +264,60 @@ func TestRefreshTokenReturnsServiceError(t *testing.T) {
 	}
 	if resp.AccessToken != "" {
 		t.Fatalf("RefreshToken() access token = %q, want empty", resp.AccessToken)
+	}
+}
+
+func TestLogoutReturnsSuccess(t *testing.T) {
+	service := &stubRegisterService{}
+	handler := &AuthServiceImpl{service: service}
+
+	resp, err := handler.Logout(context.Background(), &authmodel.LogoutReq{
+		RefreshToken: "refresh-token",
+	})
+
+	if err != nil {
+		t.Fatalf("Logout() error = %v, want nil", err)
+	}
+	if resp.Base.Code != errno.SuccessCode {
+		t.Fatalf("Logout() code = %d, want %d", resp.Base.Code, errno.SuccessCode)
+	}
+	if service.logoutCalls != 1 {
+		t.Fatalf("service Logout() calls = %d, want 1", service.logoutCalls)
+	}
+	if service.logoutRefreshToken != "refresh-token" {
+		t.Fatalf(
+			"service Logout() argument = %q, want refresh-token",
+			service.logoutRefreshToken,
+		)
+	}
+}
+
+func TestLogoutReturnsServiceError(t *testing.T) {
+	logoutErr := errno.Wrap(errno.InternalDatabaseError, errors.New("redis unavailable"))
+	service := &stubRegisterService{logoutErr: logoutErr}
+	handler := &AuthServiceImpl{service: service}
+
+	resp, err := handler.Logout(context.Background(), &authmodel.LogoutReq{
+		RefreshToken: "refresh-token",
+	})
+
+	if !errors.Is(err, logoutErr) {
+		t.Fatalf("Logout() error = %v, want %v", err, logoutErr)
+	}
+	if resp.Base.Code != errno.InternalDatabaseErrorCode {
+		t.Fatalf(
+			"Logout() code = %d, want %d",
+			resp.Base.Code,
+			errno.InternalDatabaseErrorCode,
+		)
+	}
+	if service.logoutCalls != 1 {
+		t.Fatalf("service Logout() calls = %d, want 1", service.logoutCalls)
+	}
+	if service.logoutRefreshToken != "refresh-token" {
+		t.Fatalf(
+			"service Logout() argument = %q, want refresh-token",
+			service.logoutRefreshToken,
+		)
 	}
 }

@@ -143,11 +143,18 @@ func Logout(ctx context.Context, c *app.RequestContext) {
 	var req api.LogoutReq
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		base.ErrHTTPResp(c, err)
 		return
 	}
 
-	resp := new(api.LogoutResp)
+	RPCresp, err := client.AuthServiceClient.Logout(ctx, &auth.LogoutReq{
+		RefreshToken: req.RefreshToken,
+	})
 
-	c.JSON(consts.StatusOK, resp)
+	if err != nil {
+		base.ErrHTTPRespWithData(c, err, RPCresp)
+		return
+	}
+
+	base.SuccessHTTPRespWithData(c, RPCresp)
 }

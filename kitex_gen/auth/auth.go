@@ -167,8 +167,7 @@ func (p *LoginResp) String() string {
 }
 
 type LogoutReq struct {
-	Id           string `thrift:"id,1" frugal:"1,default,string" json:"id"`
-	RefreshToken string `thrift:"refresh_token,2" frugal:"2,default,string" json:"refresh_token"`
+	RefreshToken string `thrift:"refresh_token,1" frugal:"1,default,string" json:"refresh_token"`
 }
 
 func NewLogoutReq() *LogoutReq {
@@ -178,15 +177,8 @@ func NewLogoutReq() *LogoutReq {
 func (p *LogoutReq) InitDefault() {
 }
 
-func (p *LogoutReq) GetId() (v string) {
-	return p.Id
-}
-
 func (p *LogoutReq) GetRefreshToken() (v string) {
 	return p.RefreshToken
-}
-func (p *LogoutReq) SetId(val string) {
-	p.Id = val
 }
 func (p *LogoutReq) SetRefreshToken(val string) {
 	p.RefreshToken = val

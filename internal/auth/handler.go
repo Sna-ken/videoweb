@@ -16,6 +16,7 @@ type registerService interface {
 	Register(ctx context.Context, username, password string) (string, error)
 	Login(ctx context.Context, username, password, mfa_code string) (string, string, error)
 	RefreshToken(ctx context.Context, userID, refreshToken string) (string, error)
+	Logout(ctx context.Context, refreshtoken string) error
 }
 
 type userCreator interface {
@@ -94,8 +95,13 @@ func (s *AuthServiceImpl) Login(ctx context.Context, req *auth.LoginReq) (resp *
 
 // Logout implements the AuthServiceImpl interface.
 func (s *AuthServiceImpl) Logout(ctx context.Context, req *auth.LogoutReq) (resp *auth.LogoutResp, err error) {
-	// TODO: Your code here...
-	return
+	err = s.service.Logout(ctx, req.RefreshToken)
+	if err != nil {
+		return &auth.LogoutResp{Base: base.ErrsRPCResp(err)}, err
+	}
+	return &auth.LogoutResp{
+		Base: base.SuccessRPCResp(),
+	}, nil
 }
 
 // GetMFAqr implements the AuthServiceImpl interface.
